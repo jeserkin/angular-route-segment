@@ -37,7 +37,7 @@ mod.provider( '$routeSegment',
     }
     
     function pointer(segment, parent) {
-        
+
         if(!segment)
             throw new Error('Invalid pointer segment');
         
@@ -48,7 +48,7 @@ mod.provider( '$routeSegment',
             /**
              * Adds new segment at current pointer level.
              * 
-             * @param string} name Name of a segment.
+             * @param {string} name Name of a segment.
              * @param {Object} params Segment's parameters hash. The following params are supported:
              *                        - `template` provides HTML for the given segment view;
              *                        - `templateUrl` is a template should be fetched from network via this URL;
@@ -136,8 +136,8 @@ mod.provider( '$routeSegment',
     this.$get = ['$rootScope', '$q', '$http', '$templateCache', '$route', '$routeParams', '$injector',
                  function($rootScope, $q, $http, $templateCache, $route, $routeParams, $injector) {
                 
-        var $routeSegment = {    
-                
+        var $routeSegment = {
+
                 /**
                  * Fully qualified name of current active route
                  * @type {string}
@@ -208,6 +208,18 @@ mod.provider( '$routeSegment',
                         throw new Error('Route param `'+m[1]+'` is not specified for route `'+segmentRoutes[segmentName]+'`');
 
                     return url;
+                },
+
+                /**
+                 * A method to get raw URL for the specified segment name
+                 * @param segmentName
+                 * @returns {*}
+                 */
+                getRawSegmentUrl: function(segmentName) {
+                    if(!segmentRoutes[segmentName])
+                        throw new Error('Can not get URL for segment with name `'+segmentName+'`');
+
+                    return segmentRoutes[segmentName];
                 }
         };    
 
@@ -305,8 +317,6 @@ mod.provider( '$routeSegment',
                                         lastUpdateIndex = index;
                                     }
                                 })(i, children, index);
-                                
-
                             }
                         }
                     }
@@ -411,7 +421,7 @@ mod.provider( '$routeSegment',
                                     params.watcher,
                                     {},
                                     {segment: $routeSegment.chain[index]});
-                            }
+                            };
 
                             var lastWatcherValue = getWatcherValue();
 
@@ -494,6 +504,18 @@ mod.provider( '$routeSegment',
 mod.filter('routeSegmentUrl', ['$routeSegment', function($routeSegment) {
     var filter = function(segmentName, params) {
         return $routeSegment.getSegmentUrl(segmentName, params);
+    };
+    filter.$stateful = true;
+    return filter;
+}]);
+
+/**
+ * Usage:
+ * <a ng-href="{{ 'index.list' | routeRawSegmentUrl }}">
+ */
+mod.filter('routeRawSegmentUrl', ['$routeSegment', function($routeSegment) {
+    var filter = function(segmentName) {
+        return $routeSegment.getRawSegmentUrl(segmentName);
     };
     filter.$stateful = true;
     return filter;
